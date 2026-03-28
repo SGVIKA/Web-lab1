@@ -1,4 +1,4 @@
-import { Heading2 } from "../ui/Heading/Heading2";
+import { Heading2 } from "../ui/Headings/Heading2";
 import { ResultBody } from "./ResultBody/ResultBody";
 
 export function CounterResult() {

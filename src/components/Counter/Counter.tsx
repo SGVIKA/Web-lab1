@@ -1,4 +1,4 @@
-import { Heading } from "../ui/Heading/Heading";
+import { Heading } from "../ui/Headings/Heading";
 import { CounterBody } from "./CounterBody/CounterBody";
 
 export function Counter() {

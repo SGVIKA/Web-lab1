@@ -6,6 +6,7 @@ import { PHYSICAL_ACTIVITY, USER_PARAMS } from "./counter-form.data";
 import type { IFormGroupItem } from "../../../ui/Fieldset/Fields/FormGroup/form-group.interface";
 import { FormRadio } from "../../../ui/Fieldset/Fields/FormRadio/FormRadio";
 import { FormButtons } from "../FormButtons/FormButtond";
+import { useGenderStore } from "../../../../hooks/useGenderStore";
 
 export const UserParamsContext = createContext<IFormGroupItem>({
   id: "",
@@ -15,6 +16,8 @@ export const UserParamsContext = createContext<IFormGroupItem>({
 });
 
 export function CounterForm() {
+  // const { gender, setGender } = useGenderStore();
+
   return (
     <form className="form">
       <Fieldset title="Пол">
