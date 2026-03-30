@@ -1,3 +1,5 @@
+import type { ChangeEvent } from "react";
+import { useParamsStore } from "../../../../../../hooks/useParamsStore";
 import type { IFormControl } from "./form-control.interface";
 
 export function FormControl({
@@ -6,9 +8,14 @@ export function FormControl({
   minValue = 0,
   isError,
   value,
-  onChange
+  onChange,
 }: IFormControl) {
-  
+  const { setParam } = useParamsStore();
+  const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChange(e);
+    setParam(id, e.target.valueAsNumber);
+  };
+
   return (
     <input
       className={`form__control ${isError ? "form__control_error" : ""}`}
@@ -18,8 +25,7 @@ export function FormControl({
       value={value}
       min={minValue}
       max={maxValue}
-      onChange={onChange}
+      onChange={handleOnChange}
     />
-    
   );
 }

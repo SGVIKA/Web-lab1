@@ -9,7 +9,7 @@ export interface IParamsStore {
   setHeight: (value: number) => void;
   setWeight: (value: number) => void;
 
-  setParam: (id: "age" | "height" | "weight", value: number) => void;
+  setParam: (id: string, value: number) => void;
 
   }
 

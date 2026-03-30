@@ -5,10 +5,12 @@ import { ErrorMessage } from "../../../ErrorMessage";
 import { useValidation } from "../../../../../hooks/useValidation";
 // import { UserParamsContext } from "../../../../Counter/CounterBody/CounterForm/UserParams/UserParams";
 import type { IFormGroupItem } from "./form-group.interface";
+import { useParamsStore } from "../../../../../hooks/useParamsStore";
 
 export function FormGroup({item}:{item:IFormGroupItem}) {
   // const item = useContext(UserParamsContext);
   const { value, onChange, isError, errorMessage } = useValidation(item);
+  // const {setParam} = useParamsStore()
 
   return (
     <div className="form__group">
