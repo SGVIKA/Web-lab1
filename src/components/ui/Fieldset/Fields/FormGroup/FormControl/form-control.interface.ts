@@ -5,6 +5,6 @@ export interface IFormControl {
   maxValue?: number;
   minValue?: number;
   isError: boolean;
-  value: number;
+  // value: number;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }

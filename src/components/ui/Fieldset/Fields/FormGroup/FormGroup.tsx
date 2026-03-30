@@ -1,16 +1,12 @@
-// import { useContext } from "react";
 import { FormLabel } from "../../Labels/FormLabel/FormLabel";
 import { FormControl } from "./FormControl/FormControl";
 import { ErrorMessage } from "../../../ErrorMessage";
 import { useValidation } from "../../../../../hooks/useValidation";
-// import { UserParamsContext } from "../../../../Counter/CounterBody/CounterForm/UserParams/UserParams";
 import type { IFormGroupItem } from "./form-group.interface";
-import { useParamsStore } from "../../../../../hooks/useParamsStore";
 
-export function FormGroup({item}:{item:IFormGroupItem}) {
-  // const item = useContext(UserParamsContext);
-  const { value, onChange, isError, errorMessage } = useValidation(item);
-  // const {setParam} = useParamsStore()
+export function FormGroup({ item }: { item: IFormGroupItem }) {
+  const { onChange, isError, errorMessage } = useValidation(item);
+  
 
   return (
     <div className="form__group">
@@ -25,7 +21,6 @@ export function FormGroup({item}:{item:IFormGroupItem}) {
         maxValue={item.maxValue}
         minValue={item.minValue}
         isError={isError}
-        value={value}
         onChange={onChange}
       />
       {isError ? <ErrorMessage message={errorMessage} /> : null}

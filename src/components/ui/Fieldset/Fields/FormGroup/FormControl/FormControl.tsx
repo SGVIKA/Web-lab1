@@ -7,13 +7,29 @@ export function FormControl({
   maxValue,
   minValue = 0,
   isError,
-  value,
   onChange,
 }: IFormControl) {
-  const { setParam } = useParamsStore();
+  const { age, height, weight, setParam } = useParamsStore();
+  const paramMap = {
+    age: age,
+    height: height,
+    weight: weight,
+  };
+  const currentParam = paramMap[id as keyof typeof paramMap];
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e);
-    setParam(id, e.target.valueAsNumber);
+    let num = e.target.valueAsNumber;
+    if (isNaN(num)) num = minValue;
+
+    if (maxValue !== undefined) {
+      num = Math.max(minValue, Math.min(maxValue, num));
+    } else {
+      num = Math.max(minValue, num);
+    }
+
+    onChange(e); // валидация
+    setParam(id, num);
+    // onChange(e);
+    // setParam(id, e.target.valueAsNumber);
   };
 
   return (
@@ -22,7 +38,7 @@ export function FormControl({
       type="number"
       id={id}
       name={id}
-      value={value}
+      value={currentParam}
       min={minValue}
       max={maxValue}
       onChange={handleOnChange}

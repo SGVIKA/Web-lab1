@@ -1,17 +1,13 @@
 import { useCallback, useState, type ChangeEvent } from "react";
 import type { IFormGroupItem } from "../components/ui/Fieldset/Fields/FormGroup/form-group.interface";
 import { useErrorStore } from "./useErrorStore";
-
-// export interface IUseValidation {
-//   minValue: number;
-//   maxValue?: number;
-//   id: string;
-// }
+import { useParamsStore } from "./useParamsStore";
 
 export function useValidation({ minValue, maxValue, id }: IFormGroupItem) {
-  const [value, setValue] = useState(minValue);
+  // const [value, setValue] = useState(minValue);
   const [isError, setIsError] = useState(false);
   const { setIsAgeError, setIsHeightError, setIsWeightError } = useErrorStore();
+  const { setParam } = useParamsStore();
 
   const clamp = useCallback(
     (num: number): number => {
@@ -40,14 +36,14 @@ export function useValidation({ minValue, maxValue, id }: IFormGroupItem) {
     (e: ChangeEvent<HTMLInputElement>) => {
       const num = e.target.valueAsNumber;
       if (isNaN(num)) {
-        setValue(minValue);
+        setParam(id, minValue);
         setIsError(true);
         error(id, true);
         return;
       }
 
       const clampedNum = clamp(num);
-      setValue(clampedNum);
+      setParam(id, clampedNum);
 
       if (maxValue !== undefined && (num > maxValue || num < minValue)) {
         setIsError(true);
@@ -60,7 +56,7 @@ export function useValidation({ minValue, maxValue, id }: IFormGroupItem) {
         error(id, false);
       }
     },
-    [minValue, maxValue, clamp],
+    [minValue, maxValue, clamp, id, setParam, error],
   );
 
   const errorMessage = isError
@@ -69,5 +65,5 @@ export function useValidation({ minValue, maxValue, id }: IFormGroupItem) {
       : `Значение не должно быть отрицательным`
     : "";
 
-  return { value, onChange, isError, errorMessage };
+  return { onChange, isError, errorMessage };
 }
