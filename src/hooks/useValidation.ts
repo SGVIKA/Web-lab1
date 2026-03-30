@@ -65,5 +65,5 @@ export function useValidation({ minValue, maxValue, id }: IFormGroupItem) {
       : `Значение не должно быть отрицательным`
     : "";
 
-  return { onChange, isError, errorMessage };
+  return { onChange, errorMessage };
 }
