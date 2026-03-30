@@ -4,7 +4,7 @@ import { useParamsStore } from "../../../../../hooks/useParamsStore";
 
 export function ResetButton() {
   const { setGender } = useGenderStore();
-  const { setAge, setHeight, setWeight } = useParamsStore();
+  const {age, height, weight, setAge, setHeight, setWeight } = useParamsStore();
   const { setActivity } = useActivityStore();
 
   const handleReset = () => {

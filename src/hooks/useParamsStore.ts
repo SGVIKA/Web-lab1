@@ -5,16 +5,27 @@ export interface IParamsStore {
   height: number;
   weight: number;
 
-  setAge: (age: number) => void;
-  setHeight: (height: number) => void;
-  setWeight: (weight: number) => void;
-}
+  setAge: (value: number) => void;
+  setHeight: (value: number) => void;
+  setWeight: (value: number) => void;
+
+  setParam: (id: "age" | "height" | "weight", value: number) => void;
+
+  }
 
 export const useParamsStore = create<IParamsStore>((set) => ({
   age: 0,
+  setAge: (value) => set({ age: value }),
   height: 0,
+  setHeight: (value) => set({ height: value }),
   weight: 0,
-  setAge: (age) => set({ age }),
-  setHeight: (height) => set({ height }),
-  setWeight: (weight) => set({ weight }),
+  setWeight: (value) => set({ weight: value }),
+  setParam: (id, value) =>
+    set((state) => {
+      if (id === "age") return { age: value };
+      if (id === "height") return { height: value };
+      if (id === "weight") return { weight: value };
+      return state;
+    }),
+    
 }));
