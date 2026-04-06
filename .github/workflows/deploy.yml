@@ -1,0 +1,67 @@
+name: Lab1 CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Build Docker image
+        run: |
+          docker build -t lab1-frontend .
+
+  push-image:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/lab1-frontend:latest
+
+  deploy:
+    needs: push-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to remote server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/lab1
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/lab1-frontend:latest
+            docker stop lab1-frontend || true
+            docker rm lab1-frontend || true
+            docker run -d -p 80:5000 --name lab1-frontend ${{ secrets.DOCKERHUB_USERNAME }}/lab1-frontend:latest
