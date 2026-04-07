@@ -1,4 +1,5 @@
 import { useActivityStore } from "../../../../../hooks/useActivityStore";
+import { useErrorStore } from "../../../../../hooks/useErrorStore";
 import { useGenderStore } from "../../../../../hooks/useGenderStore";
 import { useParamsStore } from "../../../../../hooks/useParamsStore";
 import { useResultStore } from "../../../../../hooks/useResultStore";
@@ -8,6 +9,7 @@ export function ResetButton() {
   const { setAge, setHeight, setWeight } = useParamsStore();
   const { setActivity } = useActivityStore();
   const { setDailyCalories, setTargetCalories } = useResultStore();
+  const { setIsAgeError, setIsHeightError, setIsWeightError } = useErrorStore();
 
   const handleReset = () => {
     setGender("male");
@@ -17,6 +19,9 @@ export function ResetButton() {
     setActivity("min");
     setDailyCalories(undefined);
     setTargetCalories(undefined);
+    setIsAgeError(false);
+    setIsHeightError(false);
+    setIsWeightError(false);
   };
   return (
     <button

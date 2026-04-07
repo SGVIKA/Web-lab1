@@ -3,10 +3,17 @@ import { FormControl } from "./FormControl/FormControl";
 import { ErrorMessage } from "../../../ErrorMessage";
 import { useValidation } from "../../../../../hooks/useValidation";
 import type { IFormGroupItem } from "./form-group.interface";
+import { useErrorStore } from "../../../../../hooks/useErrorStore";
 
 export function FormGroup({ item }: { item: IFormGroupItem }) {
-  const { onChange, isError, errorMessage } = useValidation(item);
-  
+  const { onChange, errorMessage } = useValidation(item);
+  const { isAgeError, isHeightError, isWeightError } = useErrorStore();
+  const errorMap = {
+    age: isAgeError,
+    height: isHeightError,
+    weight: isWeightError,
+  };
+  const isError = errorMap[item.id as keyof typeof errorMap];
 
   return (
     <div className="form__group">
