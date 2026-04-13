@@ -4,7 +4,6 @@ import { useErrorStore } from "./useErrorStore";
 import { useParamsStore } from "./useParamsStore";
 
 export function useValidation({ minValue, maxValue, id }: IFormGroupItem) {
-  // const [value, setValue] = useState(minValue);
   const [isError, setIsError] = useState(false);
   const { setIsAgeError, setIsHeightError, setIsWeightError } = useErrorStore();
   const { setParam } = useParamsStore();
