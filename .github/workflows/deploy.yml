@@ -1,33 +1,93 @@
-name: Deploy to Server
+name: CI/CD Pipeline for Monolith Lab
+
 on:
   push:
-    branches: [ main ]
-    
+    branches: [ "main" ]
+  workflow_dispatch: # Позволяет запускать вручную из интерфейса GitHub
+
+env:
+  # Имя образа в реестре GitHub (будет выглядеть как ghcr.io/твой_ник/имя_репозитория)
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  deploy:
+  # Джоба 1: Сборка и Тесты
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Login to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
-    - name: Build and Push
-      run: |
-        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/lab1 .
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/lab1
-    
-    - name: Deploy to Server
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/lab1
-          docker stop lab1 || true
-          docker rm lab1 || true
-          docker run -d --name lab1 -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/lab1
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      # Тесты (если бы они были в проекте)
+      # - name: Run tests
+      #   run: npm run test
+      
+      # Линтинг (может сломать сборку, если есть ошибки. Можно раскомментировать для строгости)
+      # - name: Run linter
+      #   run: npm run lint
+
+  # Джоба 2: Сборка и Публикация Docker образа
+  build-and-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Даем права на запись в GitHub Packages
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  # Джоба 3: Деплой на удаленный сервер
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          # Эти переменные нужно будет добавить в Secrets репозитория!
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            # Останавливаем и удаляем старый контейнер, если он запущен
+            docker stop lab1-frontend || true
+            docker rm lab1-frontend || true
+            
+            # Логинимся в GitHub Container Registry (используем токен CI)
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Скачиваем свежий образ
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            
+            # Запускаем контейнер на 80 порту (или на другом, например 3000 -> 80)
+            # Если у тебя на сервере уже стоит Nginx или Apache, пробрось другой порт: -p 8080:80
+            docker run -d --name lab1-frontend --restart always -p 80:80 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            
+            # Очистка старых образов (чтобы не забивать диск)
+            docker image prune -af
